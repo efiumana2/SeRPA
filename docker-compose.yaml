@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - $MYSQL_EXPOSED_PORT:$MYSQL_INTERNAL_PORT
+    volumes:
+      - ./db/data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d
+
+  backend:
+    image: app-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        ARG_BACKEND_EXPOSED_PORT: $BACKEND_EXPOSED_PORT
+    depends_on:
+      - mysqldb
+    restart: on-failure
+    env_file: ./.env
+    ports:
+      - $BACKEND_EXPOSED_PORT:$BACKEND_INTERNAL_PORT
+    environment:
+      - DB_HOST=mysqldb
+      - PRESENZE_PORT=$BACKEND_INTERNAL_PORT
+
+  frontend:
+    image: app-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - BACK_PORT=$BACKEND_EXPOSED_PORT
+    depends_on:
+      - backend
+    restart: on-failure
+    env_file: ./.env
+    ports:
+      - $FRONTEND_EXPOSED_PORT:$FRONTEND_INTERNAL_PORT
