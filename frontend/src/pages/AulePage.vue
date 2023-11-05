@@ -45,15 +45,15 @@ export default defineComponent({
                     if (response.data.length === 0) {
                         alert('No Rows')
                     } else {
-                        response.data.forEach(Aula =>  {
+                        for (const Aula of response.data) {
                             this.Aule.push({ID_Edificio: Aula.ID_Edificio,
                                 ID_Aula: Aula.ID_Aula,
                                 Descrizione: Aula.Descrizione,
                                 IP: Aula.IP,
                                 Num_Cam: Aula.Num_Cam,
-                                IsAlive: CheckAlive(Aula.ID_Edificio, Aula.ID_Aula)
+                                IsAlive: await CheckAlive(Aula.ID_Edificio, Aula.ID_Aula)
                             })
-                        })
+                        }
                     }
                 }
                 catch(error) {
